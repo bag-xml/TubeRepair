@@ -10,3 +10,5 @@ TubeRepair-Tweak_FILES = Tweak.x
 TubeRepair-Tweak_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
+SUBPROJECTS += tuberepair-pref
+include $(THEOS_MAKE_PATH)/aggregate.mk
