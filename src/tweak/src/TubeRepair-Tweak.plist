@@ -1,1 +1,1 @@
-{ Filter = { Bundles = ( "com.google.youtube" ); }; }
+{ Filter = { Bundles = ( "com.apple.youtube", "com.google.ios.youtube" ); }; }
