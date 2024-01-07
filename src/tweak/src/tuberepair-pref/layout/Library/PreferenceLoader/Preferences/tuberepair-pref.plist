@@ -15,7 +15,7 @@
 		<key>isController</key>
 		<true/>
 		<key>label</key>
-		<string>tuberepair-pref</string>
+		<string>TubeRepair</string>
 	</dict>
 </dict>
 </plist>

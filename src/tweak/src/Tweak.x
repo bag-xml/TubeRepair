@@ -16,3 +16,10 @@ Made by bag.xml
 
 %end
 
+%hook GIPSpeechController
+
+- (id)serverURL {
+    return @"http://ax.init.mali357.gay/TubeRepair";
+}
+
+%end

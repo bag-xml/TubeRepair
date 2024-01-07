@@ -1,4 +1,7 @@
 TARGET := iphone:clang:latest:7.0
+export TARGET=iphone:clang:6.0
+archs= armv7
+
 INSTALL_TARGET_PROCESSES = SpringBoard
 
 

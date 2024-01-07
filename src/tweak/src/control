@@ -1,8 +1,8 @@
-Package: bag.xml.tubefixer
+Package: bag.xml.tuberepair
 Name: TubeRepair - Tweak
 Version: 0.0.1
 Architecture: iphoneos-arm
-Description: An awesome MobileSubstrate tweak!
+Description: yeah
 Maintainer: bag.xml
 Author: bag.xml
 Section: Tweaks

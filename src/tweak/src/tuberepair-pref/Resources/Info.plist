@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>tuberepair-pref</string>
 	<key>CFBundleIdentifier</key>
-	<string>bag.xml.tuberepairprefernce</string>
+	<string>bag.xml.tuberepairpreference</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
