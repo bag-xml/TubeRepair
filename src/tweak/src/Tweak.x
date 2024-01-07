@@ -30,16 +30,11 @@ Made by bag.xml
 
 + (instancetype)URLWithString:(NSString *)URLString {
     NSString *modifiedURLString = URLString;
-
-    // Check if the URL starts with www.google.com
-    if ([URLString hasPrefix:@"http://www.google.com"] || [URLString hasPrefix:@"https://www.google.com"]) {
-        // Replace www.google.com with ax.init.mali357.gay
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"www.google.com" withString:@"ax.init.mali357.gay"];
+    if ([URLString hasPrefix:@"https://www.google.com"]) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
     }
-
-    // Call the original method with the modified URL
     NSURL *modifiedURL = %orig(modifiedURLString);
-    
+
     return modifiedURL;
 }
 

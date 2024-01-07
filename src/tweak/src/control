@@ -7,3 +7,4 @@ Maintainer: bag.xml
 Author: bag.xml
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000)
+Icon: icon.png
