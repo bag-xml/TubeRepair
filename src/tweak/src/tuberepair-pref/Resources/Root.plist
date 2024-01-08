@@ -24,7 +24,7 @@
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>default</key>
-			<true/>
+			<false/>
 			<key>defaults</key>
 			<string>bag.xml.tuberepairpreference</string>
 			<key>key</key>
@@ -52,7 +52,7 @@
 			<key>defaults</key>
 			<string>bag.xml.tuberepairpreference</string>
 			<key>key</key>
-			<string>gdataURL</string>
+			<string>GDataURLEndpoint</string>
 			<key>label</key>
 			<string>URL</string>
 			<key>PostNotification</key>
@@ -84,7 +84,7 @@
 			<key>defaults</key>
 			<string>bag.xml.tuberepairpreference</string>
 			<key>key</key>
-			<string>googleapisURL</string>
+			<string>apiaryURLEndpoint</string>
 			<key>label</key>
 			<string>URL</string>
 			<key>PostNotification</key>
