@@ -47,12 +47,14 @@ Made by bag.xml
 + (instancetype)URLWithString:(NSString *)URLString {
     NSString *modifiedURLString = URLString;
 
-    if ([URLString hasPrefix:@"https://www.google.com"]) {
+    // Modify "https://www.google.com" URL
+    if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
     }
 
-    if ([URLString hasPrefix:@"http://gdata.youtube.com"]) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"http://gdata.youtube.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
+    // Modify "http://gdata.youtube.com" URL
+    if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
@@ -61,4 +63,5 @@ Made by bag.xml
 }
 
 %end
+
 
