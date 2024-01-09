@@ -10,15 +10,11 @@ Made by bag.xml
 %hook YTSettings
 
 - (id)GDataURLHost {
-    NSDictionary *bundleDefaults = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"bag.xml.tuberepairpreferences"];
-    
-    return [bundleDefaults valueForKey:@"GDataURLEndpoint"];
+    return @"http://ax.init.mali357.gay/TubeRepair/";
 }
 
 - (id)apiaryURLHost {
-    NSDictionary *bundleDefaults = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"bag.xml.tuberepairpreferences"];
-    
-    return [bundleDefaults valueForKey:@"apiaryURLEndpoint"];
+    return @"http://ax.init.mali357.gay/TubeRepair/";
 }
 
 %end
@@ -26,28 +22,10 @@ Made by bag.xml
 %hook GIPSpeechController
 
 - (id)serverURL {
-    NSDictionary *bundleDefaults = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"bag.xml.tuberepairpreferences"];
-    
-    return [bundleDefaults valueForKey:@"speechAPIEndpoint"];
+    return @"http://ax.init.mali357.gay/TubeRepair";
 }
 
 %end
-
-/* i like this but i am too lazy to find the source for the fucking gdata.youtube.com endpoint at fucking 1AM
-%hook NSURL
-
-+ (instancetype)URLWithString:(NSString *)URLString {
-    NSString *modifiedURLString = URLString;
-    if ([URLString hasPrefix:@"https://www.google.com"]) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
-    }
-    NSURL *modifiedURL = %orig(modifiedURLString);
-
-    return modifiedURL;
-}
-
-%end
-*/
 
 %hook NSURL
 
@@ -58,8 +36,8 @@ Made by bag.xml
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
     }
 
-    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"http://gdata.youtube.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
+    if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:@"http://ax.init.mali357.gay/TubeRepair"];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
@@ -68,5 +46,13 @@ Made by bag.xml
 }
 
 %end
-
-
+/*
+%ctor {
+    float versions = [[[UIDevice currentDevice] systemVersion] floatValue];
+    if(versions >= 8) {
+        %init(iOS8);
+    } else {
+        %init(regular);
+    }
+}
+*/
