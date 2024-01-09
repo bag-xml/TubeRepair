@@ -6,11 +6,10 @@ Made by bag.xml
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
 
-#define settingsPath [NSHomeDirectory() stringByAppendingPathComponent:@"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist"]
-
 %hook YTSettings
 
 - (id)GDataURLHost {
+    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *URL = [prefs objectForKey:@"GDataURLEndpoint"];
     
