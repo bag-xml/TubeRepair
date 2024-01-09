@@ -6,18 +6,15 @@ Made by bag.xml
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
 
-/*
-- (id)GDataURLHost {
-    return @"http://ax.init.mali357.gay/TubeRepair/";
-}
-*/
+#define settingsPath [NSHomeDirectory() stringByAppendingPathComponent:@"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist"]
 
 %hook YTSettings
 
 - (id)GDataURLHost {
-    NSDictionary *bundleDefaults = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist"];
-
-    return [bundleDefaults valueForKey:@"GDataURLEndpoint"];
+    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+    NSString *URL = [prefs objectForKey:@"GDataURLEndpoint"];
+    
+    return URL;
 }
 
 - (id)apiaryURLHost {
