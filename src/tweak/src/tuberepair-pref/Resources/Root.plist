@@ -14,7 +14,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string> You can set an alternate URL for each URL hooked by this tweak, URLs needed for the classic YouTube app and the Google YT App (1.4.0 recommended) to work with this tweak.</string>
+			<string> You can set a custom URL here, aswell as your custom API Key. If you'd like to have more customization over individual endpoints, get the "Nerdy version" of the tweak.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -44,7 +44,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>https://gdata.youtube.com</string>
+			<string>Custom URL</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -52,9 +52,41 @@
 			<key>defaults</key>
 			<string>bag.xml.tuberepairpreference</string>
 			<key>key</key>
-			<string>GDataURLEndpoint</string>
+			<string>URLEndpoint</string>
 			<key>label</key>
 			<string>URL</string>
+			<key>PostNotification</key>
+			<string>bag.xml.tuberepairpreference/settingschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Save</string>
+			<key>action</key>
+			<string>save</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Custom API Key</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>bag.xml.tuberepairpreference</string>
+			<key>key</key>
+			<string>apiKey</string>
+			<key>label</key>
+			<string>API Key</string>
 			<key>PostNotification</key>
 			<string>bag.xml.tuberepairpreference/settingschanged</string>
 		</dict>

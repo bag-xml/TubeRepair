@@ -11,13 +11,13 @@ Made by bag.xml
 - (id)GDataURLHost {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-    return [prefs objectForKey:@"GDataURLEndpoint"];
+    return [prefs objectForKey:@"URLEndpoint"];
 }
 
 - (id)apiaryURLHost {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-    return [prefs objectForKey:@"GDataURLEndpoint"];
+    return [prefs objectForKey:@"URLEndpoint"];
 }
 
 %end
@@ -39,11 +39,11 @@ Made by bag.xml
     NSString *modifiedURLString = URLString;
 
     if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"GDataURLEndpoint"]];
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
 
-    if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"GDataURLEndpoint"]];
+    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"http://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
