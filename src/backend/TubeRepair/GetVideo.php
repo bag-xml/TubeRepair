@@ -1,5 +1,6 @@
 <?php
+include "configuration.php";
 $videoID = $_GET['videoId'];
 if(strlen($videoID) > 2){
-	header("Location: https://yewtu.be/latest_version?id=" . $videoID);
+	header("Location: https://$invidiousURL/latest_version?id=" . $videoID);
 }
