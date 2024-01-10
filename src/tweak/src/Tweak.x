@@ -36,11 +36,16 @@ Made by bag.xml
     return 0;
 }
 %end
+//yeah kys ios 8
+
+
 %hook GIPSpeechController
 
 - (id)serverURL {
     //WORK IN PROGRESS
-    return @"http://ax.init.mali357.gay/TubeRepair";
+    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+    return [prefs objectForKey:@"speechURL"];
 }
 
 %end
