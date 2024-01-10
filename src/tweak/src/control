@@ -1,6 +1,6 @@
 Package: bag.xml.tuberepair
 Name: TubeRepair - Tweak
-Version: 0.0.1
+Version: 1.0-Alpha-1
 Architecture: iphoneos-arm
 Description: yeah
 Maintainer: bag.xml

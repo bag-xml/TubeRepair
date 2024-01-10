@@ -22,6 +22,20 @@ Made by bag.xml
 
 %end
 
+
+//kill yourself iOS 8
+%hook YTSuggestService
+
+- (instancetype)initWithOperationQueue:(id)operationQueue HTTPFetcherService:(id)httpFetcherService {
+    return 0;
+}
+%end
+
+%hook YTSearchHistory
+- (id)history {
+    return 0;
+}
+%end
 %hook GIPSpeechController
 
 - (id)serverURL {

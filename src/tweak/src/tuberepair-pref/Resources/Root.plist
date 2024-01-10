@@ -108,7 +108,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Project made with love by bag.xml. Shoutouts go out to InvoxiPlayGames and TubeFixer</string>
+			<string>Project made with love by bag.xml and Savefade. Backend made by savefade. Shoutouts go out to InvoxiPlayGames and TubeFixer</string>
 		</dict>
 	</array>
 	<key>title</key>
