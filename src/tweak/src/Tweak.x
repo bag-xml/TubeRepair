@@ -21,16 +21,6 @@ Made by bag.xml
 
 @end
 
-@interface ApiKeyCheckDelegate : NSObject <UIAlertViewDelegate>
-@end
-
-@implementation ApiKeyCheckDelegate
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    exit(0);
-}
-
-@end
 
 void warnAboutMissingKey(void){
     
