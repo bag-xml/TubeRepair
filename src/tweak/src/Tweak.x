@@ -101,7 +101,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *apiKey = [prefs objectForKey:@"apiKey"];
     if (apiKey && [apiKey length] > 0) {
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeFixer-API-Key"];
+        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
     }
 }
 
