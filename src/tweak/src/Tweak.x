@@ -21,13 +21,28 @@ Made by bag.xml
 
 @end
 
-//URL Endpoints
+//RequestHeader Setter
 
-%group Baseplate
+void addCustomHeaderToRequest(NSMutableURLRequest *request) {
+    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+    NSString *apiKey = [prefs objectForKey:@"apiKey"];
+    if (apiKey && [apiKey length] > 0) {
+        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
+    }
+}
+
+//Endpoint
 
 CFStringRef realServiceHostname(void) {
     return CFSTR("ax.init.mali357.gay/TubeRepair/");
 }
+
+
+//URL Endpoints
+
+%group Baseplate
+
 
 %hook YTSettings
 
@@ -88,16 +103,6 @@ CFStringRef realServiceHostname(void) {
 %end
 //END OF ENDPOINT HOOKS
 
-//Requestheader stuff
-
-void addCustomHeaderToRequest(NSMutableURLRequest *request) {
-    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
-    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-    NSString *apiKey = [prefs objectForKey:@"apiKey"];
-    if (apiKey && [apiKey length] > 0) {
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
-    }
-}
 
 %hook NSMutableURLRequest
 
@@ -118,23 +123,8 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 %end
 
 
-
-
-
-
-
 %group iOS2to4
 
-//Requestheader stuff
-
-void addCustomHeaderToRequest(NSMutableURLRequest *request) {
-    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
-    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-    NSString *apiKey = [prefs objectForKey:@"apiKey"];
-    if (apiKey && [apiKey length] > 0) {
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
-    }
-}
 
 %hook NSMutableURLRequest
 
@@ -153,13 +143,6 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 %end
 //end of request header stuff
 
-//endpoints
-
-CFStringRef realServiceHostname(void) {
-    return CFSTR("ax.init.mali357.gay/TubeRepair/");
-}
-
-//end of hookable endpoints
 
 %hook NSURL
 
@@ -207,7 +190,7 @@ CFStringRef realServiceHostname(void) {
 }
 %end
 
-
+%end
 
 
 %group iOS8
@@ -225,5 +208,16 @@ CFStringRef realServiceHostname(void) {
 %end
 %end
 
-%ctor
+%ctor {
+    NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
+    float version = [systemVersion floatValue];
 
+    if (version >= 2.0 && version < 5.0) {
+        %init(iOS2to4);
+    } else if (version >= 5.0 && version < 11.0) {
+        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
+        if (version >= 8.0) {
+            %init(iOS8); // Additional initialization for iOS 8 to 10
+        }
+    }
+}
