@@ -11,6 +11,7 @@ TWEAK_NAME = TubeRepair-Tweak
 
 TubeRepair-Tweak_FILES = Tweak.x
 TubeRepair-Tweak_CFLAGS = -fobjc-arc
+TubeRepair-Tweak_FRAMEWORKS = UIKit
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 SUBPROJECTS += tuberepair-pref
