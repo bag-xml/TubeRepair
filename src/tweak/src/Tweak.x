@@ -266,7 +266,7 @@ CFStringRef realServiceHostname(void) {
         warnAboutMissingKey();
         checkAPIKeyValidity();
     } else if (version >= 5.0 && version < 11.0) {
-        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
+        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.x
         warnAboutMissingKey();
         checkAPIKeyValidity();
         if (version >= 8.0) {
