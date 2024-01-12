@@ -1,7 +1,7 @@
 <?php
 include "configuration.php";
 if(isset($_GET["playlistId"])){
-	if(isset($_SERVER['HTTP_X_TUBEFIXER_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEFIXER_API_KEY'];}
+if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}else{exit;}
 $curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/playlistItems?part=snippet&maxResults=" . $MaxCount . "&playlistId=" . $_GET["playlistId"] ."&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);

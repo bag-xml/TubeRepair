@@ -133,6 +133,7 @@ CFStringRef realServiceHostname(void) {
 %end
 
 
+
 %group iOS2to4
 
 
@@ -164,6 +165,10 @@ CFStringRef realServiceHostname(void) {
 
 
     if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+    }
+    
+    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
     

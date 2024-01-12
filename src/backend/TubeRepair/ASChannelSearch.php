@@ -1,6 +1,7 @@
 <?php 
 include "configuration.php";
 if(isset($_GET["q"]) && !isset($_GET["v"])){
+if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}else{exit;}
 $curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/search?part=snippet&order=relevance&maxResults=" . $MaxCount . "&q=" . preg_replace('/\s+/', '', $_GET["q"]) ."&type=channel&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
@@ -77,6 +78,7 @@ $youtubeXML = <<<XML
 	<openSearch:totalResults>1</openSearch:totalResults>
 	<openSearch:startIndex>1</openSearch:startIndex>
 	<openSearch:itemsPerPage>1</openSearch:itemsPerPage>
+	<ApiKey>$APIkey</ApiKey>
     $entries
 </feed>
 <debug>

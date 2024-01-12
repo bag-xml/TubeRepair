@@ -12,4 +12,8 @@ if($_GET["login"] == 2){
 	die("DeviceId=". md5(rand(1, 1000)) . "
 DeviceKey=" . md5(rand(1, 1000)));
 }
+   if($_GET["login"] == 4){
+	die("DeviceId=". md5(rand(1, 1000)) . "
+DeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk=");
+}
 }

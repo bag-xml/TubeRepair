@@ -1,7 +1,7 @@
 <?php 
 include "configuration.php";
 if(isset($_GET["max-results"])){
-	if(isset($_SERVER['HTTP_X_TUBEFIXER_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEFIXER_API_KEY'];}
+if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}else{exit;}
 $curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/videos?part=snippet&chart=mostPopular&maxResults=" . $MaxCount . "&type=video&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
@@ -27,7 +27,7 @@ if($kindResponse == "youtube#videoListResponse"){
 	$defaultTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['default']['url'];
 	$mediumTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['medium']['url'];
 	$highTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['high']['url'];
-	$entry = <<<Entry
+	$entryiOS = <<<Entry
 	<entry gd:etag="$etag">
     <id>aefdhdajada</id>
     <published>$publishDate</published>
@@ -88,27 +88,65 @@ if($kindResponse == "youtube#videoListResponse"){
     </media:group>
   </entry>
 Entry;
-   $entries = $entries . $entry;
+   $entryAndroid = <<<entry
+	<entry>
+		<id>http://$baseURL/feeds/api/videos/$videoID</id>
+		<youTubeId id='$videoID'>$videoID</youTubeId>
+		<published>$publishDate</published>
+		<updated>$publishDate</updated>
+		<category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="Howto &amp; Style" term="Howto &amp; Style">Howto &amp; Style</category>
+		<title type='text'>$videoname</title>
+		<content type='text'>$description</content>
+		<link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://$baseURL/TubeRepair/feeds/api/videos/$videoID/related"/>
+		<author>
+			<name>$channelTitle</name>
+			<uri>http://gdata.youtube.com/feeds/api/users/$channelTitle</uri>
+		</author>
+		<gd:comments>
+			<gd:feedLink href='http://$baseURL/feeds/api/videos/$videoID/comments' countHint='0'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='Howto &amp; Style' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'></media:category>
+			<media:content url='http://$baseURL/$serverScriptDirectory/GetVideo.php?videoId=$videoID' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+			<media:description type='plain'>$description</media:description>
+			<media:keywords></media:keywords>
+			<media:player url='http://www.youtube.com/watch?v=$videoID'/>
+			<media:thumbnail yt:name='hqdefault' url='$defaultTHURL' height='240' width='320' time='00:00:00'/>
+			<media:thumbnail yt:name='poster' url='$mediumTHURL' height='240' width='320' time='00:00:00'/>
+			<media:thumbnail yt:name='default' url='$highTHURL' height='240' width='320' time='00:00:00'/>
+			<yt:duration seconds='100'/>
+			<yt:videoid id='-CH-Kx2sl9c'>-CH-Kx2sl9c</yt:videoid>
+			<youTubeId id='-CH-Kx2sl9c'>-CH-Kx2sl9c</youTubeId>
+			<media:credit role='uploader' name='$channelTitle'>$channelTitle</media:credit>
+		</media:group>
+		<gd:rating average='0' max='0' min='0' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount="0" viewCount="0"/>
+		<yt:rating numLikes="0" numDislikes="0"/>
+	</entry>
+entry;
+if(str_contains($_SERVER["HTTP_USER_AGENT"], "Android")){$entries = $entries . $entryAndroid;}else{$entries = $entries . $entryiOS;}
 	}
 $youtubeXML = <<<XML
 <?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:gd="http://schemas.google.com/g/2005" xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:yt="http://$baseURL/schemas/2007" xmlns:media="http://search.yahoo.com/mrss/" gd:etag="">
-  <id>http://$baseURL/feeds/api/standardfeeds/US/recently_featured</id>
-  <category scheme="http://schemas.google.com/g/2005#kind" term="http://$baseURL/schemas/2007/#video" />
-<title>Spotlight Videos</title>  <logo>http://www.gstatic.com/youtube/img/logo.png</logo>
-  <link rel="http://schemas.google.com/g/2005#feed" type="application/atom+xml" href="http://api.tubefixer.ovh/feeds/api/standardfeeds/US/recently_featured" />
-  <link rel="http://schemas.google.com/g/2005#batch" type="application/atom+xml" href="http://api.tubefixer.ovh/feeds/api/standardfeeds/US/recently_featured/batch" />
-  <link rel="self" type="application/atom+xml" href="http://api.tubefixer.ovh/feeds/api/standardfeeds/US/recently_featured?start-index=1&amp;max-results=25&amp;format=2,3,8,9&amp;fields=openSearch:totalResults,openSearch:startIndex,openSearch:itemsPerPage,link%5B@rel=&#039;http://schemas.google.com/g/2005%23batch&#039;%5D,entry(id,title,updated,published,yt:rating,link%5B@rel=&#039;edit&#039;%20or%20@rel=&#039;http://api.tubefixer.ovh/schemas/2007%23video.ratings&#039;%5D,yt:statistics(@viewCount),batch:status,yt:accessControl%5B@action=&#039;list&#039;%5D,media:group(media:thumbnail,media:content%5B@yt:format=&#039;2&#039;%20or%20@yt:format=&#039;3&#039;%20or%20@yt:format=&#039;8&#039;%20or%20@yt:format=&#039;9&#039;%5D(@yt:format,@url,@duration),media:category,media:player,media:description,media:keywords,media:rating,yt:videoid,media:credit,yt:private),app:control,gd:comments)" />
-  <!-- <link rel="service" type="application/atomsvc+xml" href="http://api.tubefixer.ovh/feeds/api/standardfeeds/US/recently_featured?alt=atom-service" /> -->
-  <author>
-    <name>Credits:TubeFixer</name>
-    <uri>http://mali357.gay/</uri>
-  </author>
-<openSearch:totalResults>$maxResultsFromYT</openSearch:totalResults>
-  <openSearch:itemsPerPage>$maxResultsFromYT</openSearch:itemsPerPage>
-  <openSearch:startIndex>1</openSearch:startIndex>
+<feed xmlns='http://www.w3.org/2005/Atom'
+xmlns:media='http://search.yahoo.com/mrss/'
+xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+xmlns:gd='http://schemas.google.com/g/2005'
+xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <updated>2010-12-21T18:59:58.000-08:00</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+    <title type='text'> </title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <openSearch:totalResults>10</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>10</openSearch:itemsPerPage>
   $entries
-  <debug>$response</debug>
 </feed>
 XML;
 die($youtubeXML);
