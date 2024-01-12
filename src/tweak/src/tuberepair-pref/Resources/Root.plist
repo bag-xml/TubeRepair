@@ -60,14 +60,6 @@
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Save</string>
-			<key>action</key>
-			<string>save</string>
-		</dict>
-		<dict>
-			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
 			<string></string>
@@ -92,17 +84,21 @@
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSButtonCell</string>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>bag.xml.tuberepairpreference</string>
+			<key>key</key>
+			<string>apiKeyRHeader</string>
 			<key>label</key>
-			<string>Save</string>
-			<key>action</key>
-			<string>save</string>
+			<string>Request Header</string>
+			<key>PostNotification</key>
+			<string>bag.xml.tuberepairpreference/settingschanged</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string></string>
+			<string>76teu9frigohuzfe79w809ufijoeruf8zd9jirhugu8e9d</string>
 		</dict>
 		<dict>
 			<key>cell</key>
