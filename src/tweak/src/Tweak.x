@@ -25,7 +25,15 @@ Made by bag.xml
 CFStringRef realServiceHostname(void) {
     return CFSTR("ax.init.mali357.gay/TubeRepair/");
 }
-
+/*
+%hook YTAccountAuthenticator
+- (id)init {
+    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+    return [prefs objectForKey:@"URLEndpoint"];
+}
+%end
+*/
 %hook YTSettings
 
 - (id)GDataURLHost {
@@ -73,13 +81,9 @@ CFStringRef realServiceHostname(void) {
 
             messageShown = YES;
         }
-    
-    if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
-    }
 
-    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"http://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+    if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
@@ -96,7 +100,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *apiKey = [prefs objectForKey:@"apiKey"];
     if (apiKey && [apiKey length] > 0) {
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-APIKey"];
+        [request setValue:apiKey forHTTPHeaderField:@"X-TubeFixer-API-Key"];
     }
 }
 
