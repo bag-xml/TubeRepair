@@ -21,6 +21,16 @@ Made by bag.xml
 
 @end
 
+@interface ApiKeyCheckDelegate : NSObject <UIAlertViewDelegate>
+@end
+
+@implementation ApiKeyCheckDelegate
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    exit(0);
+}
+
+@end
 
 void warnAboutMissingKey(void){
     
@@ -53,6 +63,54 @@ void warnAboutMissingKey(void){
             messageShown = YES;
         }
     }
+
+void checkAPIKeyValidity(void){
+    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+    NSString *apiKey = [prefs objectForKey:@"apiKey"];
+
+    if (apiKey && [apiKey length] > 0) {
+        NSURL *url = [NSURL URLWithString:@"http://ax.init.mali357.gay/TubeRepair/feeds/api/standardfeeds/US/most_popular?max-results=20&time=today&start-index=1&safeSearch=moderate&format=2,3,8,9,28,31,32,34,35,36,38"];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSURLResponse *response;
+            NSError *error;
+            [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            NSInteger statusCode = [httpResponse statusCode];
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSString *message = @"";
+
+                if (statusCode == 403) {
+                    message = @"Your API key is invalid, make sure you've correctly entered it in the setting panel without any trailing or leading spaces.";
+                } else if (error != nil && error.code == NSURLErrorUserCancelledAuthentication) {
+                    message = @"Your API key is expired, this is most likely due to high usage, please wait up to 48 hours and try again.";
+                }
+
+                if ([message length] > 0) {
+                    // Alert logic here
+                    static ApiKeyAlertDelegate *alertDelegate = nil;
+                    if (!alertDelegate) {
+                        alertDelegate = [[ApiKeyAlertDelegate alloc] init];
+                    }
+                    alertDelegate.shouldExit = YES;
+
+                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"API Key Error"
+                                                                        message:message
+                                                                       delegate:alertDelegate
+                                                              cancelButtonTitle:@"OK"
+                                                              otherButtonTitles:nil];
+                    [alertView show];
+                }
+            });
+        });
+    }
+}
+
 
 //RequestHeader Setter
 
@@ -111,6 +169,7 @@ CFStringRef realServiceHostname(void) {
 }
 
 %end
+
 //END OF ENDPOINT HOOKS
 
 
@@ -133,9 +192,7 @@ CFStringRef realServiceHostname(void) {
 %end
 
 
-
 %group iOS2to4
-
 
 %hook NSMutableURLRequest
 
@@ -168,10 +225,6 @@ CFStringRef realServiceHostname(void) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
     
-    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
-    }
-    
         if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
@@ -186,17 +239,21 @@ CFStringRef realServiceHostname(void) {
 
 
 %group iOS8
+
 %hook YTSuggestService
 
 - (instancetype)initWithOperationQueue:(id)operationQueue HTTPFetcherService:(id)httpFetcherService {
     return 0;
 }
+
 %end
 
 %hook YTSearchHistory
+
 - (id)history {
     return 0;
 }
+
 %end
 %end
 
@@ -207,9 +264,11 @@ CFStringRef realServiceHostname(void) {
     if (version >= 2.0 && version < 5.0) {
         %init(iOS2to4);
         warnAboutMissingKey();
+        checkAPIKeyValidity();
     } else if (version >= 5.0 && version < 11.0) {
         %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
         warnAboutMissingKey();
+        checkAPIKeyValidity();
         if (version >= 8.0) {
             %init(iOS8); // Additional initialization for iOS 8 to 10
         }
