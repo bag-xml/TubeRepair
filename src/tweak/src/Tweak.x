@@ -6,6 +6,10 @@ Made by bag.xml
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
 
+CFStringRef realServiceHostname(void) {
+    return CFSTR("ax.init.mali357.gay/TubeRepair/");
+}
+
 %hook YTSettings
 
 - (id)GDataURLHost {
@@ -43,8 +47,7 @@ Made by bag.xml
 }
 
 %end
-
-%group searchDeath
+/*
 %hook YTSuggestService
 
 - (instancetype)initWithOperationQueue:(id)operationQueue HTTPFetcherService:(id)httpFetcherService {
@@ -57,15 +60,4 @@ Made by bag.xml
     return 0;
 }
 %end
-%end
-
-%ctor
-{
-    NSString *version = [[UIDevice currentDevice] systemVersion];
-    float versionFloat = [[UIDevice currentDevice] systemVersion];
-
-    if (versionFloat >= 8.0) {
-        // Run the %group
-        %init(searchDeath);
-    }
-}
+*/
