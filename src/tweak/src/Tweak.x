@@ -22,6 +22,7 @@ Made by bag.xml
 @end
 
 //URL Endpoints
+
 CFStringRef realServiceHostname(void) {
     return CFSTR("ax.init.mali357.gay/TubeRepair/");
 }
@@ -90,8 +91,8 @@ CFStringRef realServiceHostname(void) {
 
     return modifiedURL;
 }
-//END OF ENDPOINT HOOKS
 %end
+//END OF ENDPOINT HOOKS
 
 //Requestheader stuff
 
