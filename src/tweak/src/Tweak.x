@@ -22,34 +22,6 @@ Made by bag.xml
 
 %end
 
-
-//kill yourself iOS 8
-%hook YTSuggestService
-
-- (instancetype)initWithOperationQueue:(id)operationQueue HTTPFetcherService:(id)httpFetcherService {
-    return 0;
-}
-%end
-
-%hook YTSearchHistory
-- (id)history {
-    return 0;
-}
-%end
-//yeah kys ios 8
-
-
-%hook GIPSpeechController
-
-- (id)serverURL {
-    //WORK IN PROGRESS
-    NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
-    NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-    return [prefs objectForKey:@"speechURL"];
-}
-
-%end
-
 %hook NSURL
 
 + (instancetype)URLWithString:(NSString *)URLString {
@@ -71,3 +43,29 @@ Made by bag.xml
 }
 
 %end
+
+%group searchDeath
+%hook YTSuggestService
+
+- (instancetype)initWithOperationQueue:(id)operationQueue HTTPFetcherService:(id)httpFetcherService {
+    return 0;
+}
+%end
+
+%hook YTSearchHistory
+- (id)history {
+    return 0;
+}
+%end
+%end
+
+%ctor
+{
+    NSString *version = [[UIDevice currentDevice] systemVersion];
+    float versionFloat = [[UIDevice currentDevice] systemVersion];
+
+    if (versionFloat >= 8.0) {
+        // Run the %group
+        %init(searchDeath);
+    }
+}
