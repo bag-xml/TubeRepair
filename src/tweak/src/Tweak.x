@@ -21,6 +21,39 @@ Made by bag.xml
 
 @end
 
+
+void warnAboutMissingKey(void){
+    
+    static BOOL messageShown = NO;
+    static ApiKeyAlertDelegate *alertDelegate = nil;
+
+        if (!messageShown) {
+                NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+                NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+                NSString *apiKey = [prefs objectForKey:@"apiKey"];
+
+                    if (!(apiKey && [apiKey length] > 0)) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+
+                            [NSThread sleepForTimeInterval:1];
+
+                            if (!alertDelegate) {
+                                alertDelegate = [[ApiKeyAlertDelegate alloc] init];
+                            }
+                            alertDelegate.shouldExit = YES;
+
+                            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Missing API Key"
+                                                                                message:@"In order to use YouTube, you need an API key, similar to the TubeFixer tweak, please acquire one and enter in the settings panel for the tweak."
+                                                                            delegate:alertDelegate
+                                                                    cancelButtonTitle:@"OK"
+                                                                    otherButtonTitles:nil];
+                            [alertView show];
+                        });
+                    }
+            messageShown = YES;
+        }
+    }
+
 //RequestHeader Setter
 
 void addCustomHeaderToRequest(NSMutableURLRequest *request) {
@@ -63,34 +96,10 @@ CFStringRef realServiceHostname(void) {
 %hook NSURL
 
 + (instancetype)URLWithString:(NSString *)URLString {
-    
-    static BOOL messageShown = NO;
-    static ApiKeyAlertDelegate *alertDelegate = nil;
+
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *modifiedURLString = URLString;
-
-        if (!messageShown) {
-                NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
-                NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-                NSString *apiKey = [prefs objectForKey:@"apiKey"];
-
-                if (!(apiKey && [apiKey length] > 0)) {
-                    if (!alertDelegate) {
-                        alertDelegate = [[ApiKeyAlertDelegate alloc] init];
-                    }
-                    alertDelegate.shouldExit = YES;
-
-                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Missing API Key"
-                                                                        message:@"In order to use YouTube, you need an API key, similar to the TubeFixer tweak, please acquire one and entered in the settings panel for the tweak."
-                                                                    delegate:alertDelegate
-                                                            cancelButtonTitle:@"OK"
-                                                            otherButtonTitles:nil];
-                    [alertView show];
-                }
-
-            messageShown = YES;
-        }
 
     if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
@@ -100,6 +109,7 @@ CFStringRef realServiceHostname(void) {
 
     return modifiedURL;
 }
+
 %end
 //END OF ENDPOINT HOOKS
 
@@ -148,33 +158,10 @@ CFStringRef realServiceHostname(void) {
 
 + (instancetype)URLWithString:(NSString *)URLString {
     
-    static BOOL messageShown = NO;
-    static ApiKeyAlertDelegate *alertDelegate = nil;
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *modifiedURLString = URLString;
 
-        if (!messageShown) {
-                NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
-                NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
-                NSString *apiKey = [prefs objectForKey:@"apiKey"];
-
-                if (!(apiKey && [apiKey length] > 0)) {
-                    if (!alertDelegate) {
-                        alertDelegate = [[ApiKeyAlertDelegate alloc] init];
-                    }
-                    alertDelegate.shouldExit = YES;
-
-                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Missing API Key"
-                                                                        message:@"In order to use YouTube, you need an API key, similar to the TubeFixer tweak, please acquire one and entered in the settings panel for the tweak."
-                                                                    delegate:alertDelegate
-                                                            cancelButtonTitle:@"OK"
-                                                            otherButtonTitles:nil];
-                    [alertView show];
-                }
-
-            messageShown = YES;
-        }
 
     if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
@@ -188,8 +175,8 @@ CFStringRef realServiceHostname(void) {
 
     return modifiedURL;
 }
-%end
 
+%end
 %end
 
 
@@ -214,8 +201,10 @@ CFStringRef realServiceHostname(void) {
 
     if (version >= 2.0 && version < 5.0) {
         %init(iOS2to4);
+        warnAboutMissingKey();
     } else if (version >= 5.0 && version < 11.0) {
         %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
+        warnAboutMissingKey();
         if (version >= 8.0) {
             %init(iOS8); // Additional initialization for iOS 8 to 10
         }
