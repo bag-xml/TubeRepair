@@ -1,7 +1,8 @@
 <?php 
 include "configuration.php";
 if(isset($_GET["channelId"])){
-$curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/playlists?part=snippet&maxResults=" . $MaxCount . "&channelId=" . $_GET["channelId"] ."&type=video&type=channel&order=relevance&key=" . $APIkey);
+	if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}else{exit;}
+$curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/playlists?part=snippet%2CcontentDetails&maxResults=" . $MaxCount . "&channelId=" . $_GET["channelId"] ."&type=video&type=channel&order=relevance&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
 
@@ -23,6 +24,7 @@ if($kindResponse == "youtube#playlistListResponse"){
 	$channelname = $decodeResponce['items'][$i]['snippet']['channelTitle'];
 	//$description = $decodeResponce['items'][$i]['snippet']['description'];
 	$playlistname = $decodeResponce['items'][$i]['snippet']['title'];
+	$videoCount = $decodeResponce['items'][$i]['contentDetails']['itemCount'];
 	$publishDate = 	rtrim($decodeResponce['items'][$i]['snippet']['publishedAt'], 'Z') . ".000Z";
 	$channelId = $decodeResponce['items'][$i]['snippet']['channelId'];
 	//$etag = $decodeResponce['items'][$i]['etag'];

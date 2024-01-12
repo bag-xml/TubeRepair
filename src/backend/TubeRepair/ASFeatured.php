@@ -1,7 +1,7 @@
 <?php
 include "configuration.php";
 if(isset($_GET["max-results"])){
-	if(isset($_SERVER['HTTP_X_TUBEFIXER_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEFIXER_API_KEY'];}
+if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}
 $curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/videos?part=snippet&chart=mostPopular&maxResults=" . $MaxCount . "&type=video&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
@@ -12,7 +12,7 @@ if(curl_error($curlConnectionInitialization)) {
 }
 $decodeResponce = json_decode($response, true);
 $kindResponse = json_decode($response, false)->kind;
-if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.0") || $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.1")|| $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.2")){
+if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.0") || $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.1")|| $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.2") || str_contains($_SERVER["HTTP_USER_AGENT"], "Android") ){
 	$maxResultsFromYT = $decodeResponce['pageInfo']['resultsPerPage'];
 	$entries = "";
 	for($i = 0; $i<$maxResultsFromYT; $i++){
@@ -27,7 +27,7 @@ if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_U
 	$defaultTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['default']['url'];
 	$mediumTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['medium']['url'];
 	$highTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['high']['url'];
-	$entry = <<<Entry
+	$entryiOS = <<<Entry
 	<entry gd:etag='W/&quot;YDwqeyM.&quot;'>
 		<id>tag:youtube.com,2008:playlist:$videoID:$videoID</id>
 		<published>$publishDate</published>
@@ -92,7 +92,47 @@ if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_U
 		<yt:position>1</yt:position>
 	</entry>
 Entry;
-   $entries = $entries . $entry;
+$entryAndroid = <<<entry
+	<entry>
+		<id>http://yt2009.giabs.ovh:80/feeds/api/videos/-CH-Kx2sl9c</id>
+		<youTubeId id='-CH-Kx2sl9c'>-CH-Kx2sl9c</youTubeId>
+		<published>2007-01-26T08:56:34.000Z</published>
+		<updated>2007-01-26T08:56:34.000Z</updated>
+		<category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="Howto &amp; Style" term="Howto &amp; Style">Howto &amp; Style</category>
+		<title type='text'>How to Unlock a Hidden Minesweeper Mode</title>
+		<content type='text'>Think you're good at Minesweeper? Is it just not challenging anymore? I'm Mark Erickson. This is Infinite Solutions. In this episode, I'll show you how to unlock the new wraparound mode to make Minesweeper exciting again.
+
+Need more help? Contact me at www.marksinfinitesolutions.com</content>
+		<link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://yt2009.giabs.ovh:80/feeds/api/videos/-CH-Kx2sl9c/related"/>
+		<author>
+			<name>infinitesolutions</name>
+			<uri>http://gdata.youtube.com/feeds/api/users/infinitesolutions</uri>
+		</author>
+		<gd:comments>
+			<gd:feedLink href='http://yt2009.giabs.ovh:80/feeds/api/videos/-CH-Kx2sl9c/comments' countHint='530'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='Howto &amp; Style' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>Howto &amp; Style</media:category>
+			<media:content url='http://yt2009.giabs.ovh:80/channel_fh264_getvideo?v=-CH-Kx2sl9c' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+			<media:description type='plain'>Think you're good at Minesweeper? Is it just not challenging anymore? I'm Mark Erickson. This is Infinite Solutions. In this episode, I'll show you how to unlock the new wraparound mode to make Minesweeper exciting again.
+
+Need more help? Contact me at www.marksinfinitesolutions.com</media:description>
+			<media:keywords>windows, xp, vista, microsoft, computer, secret, wraparound, high</media:keywords>
+			<media:player url='http://www.youtube.com/watch?v=-CH-Kx2sl9c'/>
+			<media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/-CH-Kx2sl9c/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+			<media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/-CH-Kx2sl9c/0.jpg' height='240' width='320' time='00:00:00'/>
+			<media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/-CH-Kx2sl9c/0.jpg' height='240' width='320' time='00:00:00'/>
+			<yt:duration seconds='100'/>
+			<yt:videoid id='-CH-Kx2sl9c'>-CH-Kx2sl9c</yt:videoid>
+			<youTubeId id='-CH-Kx2sl9c'>-CH-Kx2sl9c</youTubeId>
+			<media:credit role='uploader' name='infinitesolutions'>infinitesolutions</media:credit>
+		</media:group>
+		<gd:rating average='5' max='5' min='1' numRaters='8102' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount="32410" viewCount="4861568"/>
+		<yt:rating numLikes="29169" numDislikes="3241"/>
+	</entry>
+entry;
+if(str_contains($_SERVER["HTTP_USER_AGENT"], "Android")){$entries = $entries . $entryAndroid;}else{$entries = $entries . $entryiOS;}
 	}
 $youtubeXML = <<<XML
 <?xml version='1.0' encoding='UTF-8'?>

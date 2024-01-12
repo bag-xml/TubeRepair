@@ -1,6 +1,7 @@
 <?php 
 include "configuration.php";
 if(isset($_GET["channelId"])){
+	if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}else{exit;}
 $curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/channels?part=snippet&part=statistics&maxResults=" . $MaxCount . "&id=" . $_GET["channelId"] ."&key=" . $APIkey);
 curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
