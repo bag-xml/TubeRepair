@@ -127,7 +127,6 @@ void checkAPIKeyValidity(void){
                 }
 
                 if ([message length] > 0) {
-                    // Alert logic here
                     static ApiKeyAlertDelegate *alertDelegate = nil;
                     if (!alertDelegate) {
                         alertDelegate = [[ApiKeyAlertDelegate alloc] init];
@@ -202,6 +201,10 @@ CFStringRef realServiceHostname(void) {
 
     if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+    }
+    
+    if ([URLString rangeOfString:@"https://gdata.youtube.com/feeds/api/playlists"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:@"https://ax.init.mali357.gay/feeds/api/playlists"];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
