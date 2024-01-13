@@ -79,6 +79,8 @@ void checkAPIKeyValidity(void){
                     message = @"Your API key is invalid, make sure you've correctly entered it in the setting panel without any trailing or leading spaces.";
                 } else if (error != nil && error.code == NSURLErrorUserCancelledAuthentication) {
                     message = @"Your API key is expired, this is most likely due to high usage, please wait up to 48 hours and try again.";
+                } else if (error) {
+                    message = [NSString stringWithFormat:@"An error occurred: %@", error.localizedDescription];
                 }
 
                 if ([message length] > 0) {
@@ -256,7 +258,7 @@ CFStringRef realServiceHostname(void) {
         warnAboutMissingKey();
         checkAPIKeyValidity();
     } else if (version >= 5.0 && version < 11.0) {
-        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.x
+        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
         warnAboutMissingKey();
         checkAPIKeyValidity();
         if (version >= 8.0) {
