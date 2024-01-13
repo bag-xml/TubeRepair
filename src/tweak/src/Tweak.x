@@ -19,6 +19,20 @@ Made by bag.xml
     }
 }
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == [alertView cancelButtonIndex]) {
+        exit(0); // Close the app
+    } else {
+        // Set the default API key and restart the app
+        NSString *defaultApiKey = @"X-TubeRepair-API-Key";
+        NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+        NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+        [prefs setObject:defaultApiKey forKey:@"apiKeyRHeader"];
+        [prefs writeToFile:settingsPath atomically:YES];
+    }
+}
+
+
 @end
 
 
@@ -54,6 +68,36 @@ void warnAboutMissingKey(void){
         }
     }
 
+void warnAboutMissingHeader(void) {
+    static BOOL messageShown = NO;
+    static ApiKeyAlertDelegate *alertDelegate = nil;
+
+    if (!messageShown) {
+        NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
+        NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+        NSString *apiKey = [prefs objectForKey:@"apiKeyRHeader"];
+
+        if (!(apiKey && [apiKey length] > 0)) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [NSThread sleepForTimeInterval:1];
+
+                if (!alertDelegate) {
+                    alertDelegate = [[ApiKeyAlertDelegate alloc] init];
+                }
+
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Missing Header"
+                                                                    message:@"The header name containing the API key has been left blank, if you do not know what you're doing, tap on set default."
+                                                                   delegate:alertDelegate
+                                                          cancelButtonTitle:@"Close"
+                                                          otherButtonTitles:@"Set Default", nil];
+                [alertView show];
+            });
+        }
+        messageShown = YES;
+    }
+}
+
+
 void checkAPIKeyValidity(void){
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
@@ -62,7 +106,6 @@ void checkAPIKeyValidity(void){
     if (apiKey && [apiKey length] > 0) {
         NSURL *url = [NSURL URLWithString:@"http://ax.init.mali357.gay/TubeRepair/feeds/api/standardfeeds/US/most_popular?max-results=20&time=today&start-index=1&safeSearch=moderate&format=2,3,8,9,28,31,32,34,35,36,38"];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
 
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             NSURLResponse *response;
@@ -109,11 +152,17 @@ void checkAPIKeyValidity(void){
 void addCustomHeaderToRequest(NSMutableURLRequest *request) {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
+
+    // Fetch the custom header name
+    NSString *headerName = [prefs objectForKey:@"apiKeyRHeader"];
     NSString *apiKey = [prefs objectForKey:@"apiKey"];
-    if (apiKey && [apiKey length] > 0) {
-        [request setValue:apiKey forHTTPHeaderField:@"X-TubeRepair-API-Key"];
+
+    if (headerName && [headerName length] > 0 && apiKey && [apiKey length] > 0) {
+        [request setValue:apiKey forHTTPHeaderField:headerName];
     }
 }
+
+
 
 //Endpoint
 
@@ -257,10 +306,12 @@ CFStringRef realServiceHostname(void) {
         %init(iOS2to4);
         warnAboutMissingKey();
         checkAPIKeyValidity();
+        warnAboutMissingHeader();
     } else if (version >= 5.0 && version < 11.0) {
         %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
         warnAboutMissingKey();
         checkAPIKeyValidity();
+        warnAboutMissingHeader();
         if (version >= 8.0) {
             %init(iOS8); // Additional initialization for iOS 8 to 10
         }
