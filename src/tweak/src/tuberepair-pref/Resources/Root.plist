@@ -14,31 +14,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string> You can set a custom URL here, aswell as your custom API Key. If you'd like to have more customization over individual endpoints, get the "Nerdy version" of the tweak.</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>default</key>
-			<false/>
-			<key>defaults</key>
-			<string>bag.xml.tuberepairpreference</string>
-			<key>key</key>
-			<string>TweakisEnabled</string>
-			<key>label</key>
-			<string>Enabled</string>
-			<key>PostNotification</key>
-			<string>bag.xml.tuberepairpreference/settingschanged</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>footerText</key>
-			<string></string>
+			<string>Welcome to TubeRepair's beta! All you, dear beta tester, need to do is to fill out the fields below you. With the correct information it shouldn't be all that hard to fullfill this request.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -60,9 +36,21 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>bag.xml.tuberepairpreference</string>
+			<key>key</key>
+			<string>playlistEndpoint</string>
+			<key>label</key>
+			<string>Playlists</string>
+			<key>PostNotification</key>
+			<string>bag.xml.tuberepairpreference/settingschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string></string>
+			<string>Here goes the server URL. Make sure to specify http/s, and a slash after your target domain, or folder. The default would be "http://ax.init.mali357.gay/TubeRepair/" For the Playlists, specify the same URL as above, but with "feeds/api/playlists" appended. An example would be: "https://example.com/TubeRepair/feeds/api/playlists"</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -98,13 +86,13 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>76teu9frigohuzfe79w809ufijoeruf8zd9jirhugu8e9d</string>
+			<string>Don't worry about the request header if you don't know what you're doing. Leave it empty, the app will prompt you to use the default one then "X-TubeRepair-API-Key".</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Project made with love by bag.xml and Savefade. Backend made by savefade. Shoutouts go out to InvoxiPlayGames and TubeFixer</string>
+			<string>The Project TubeRepair was made by bag.xml, ObscureMosquito and Savefade, and huge shoutouts to InvoxiPlayGames and TubeFixer.</string>
 		</dict>
 	</array>
 	<key>title</key>
