@@ -8,7 +8,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Welcome to TubeRepair! If you need help with anything, at the bottom of the page is a guide link.</string>
+			<string>Welcome to TubeRepair!</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -98,6 +98,8 @@
 	<string>TubeRepair</string>
 </dict>
 </plist>
+<!-- DONT DELETE THIS IM TOO LAZY TO RE-WRITE IT-->
 <!--Welcome to TubeRepair's beta! All you, dear beta tester, need to do is to fill out the fields below you. With the correct information it shouldn't be all that hard to fullfill this request.-->
 <!--Here goes the server URL. Make sure to specify http/s, and a slash after your target domain, or folder. The default would be "http://ax.init.mali357.gay/TubeRepair/" For the Playlists, specify the same URL as above, but with "feeds/api/playlists" appended. An example would be: "https://example.com/TubeRepair/feeds/api/playlists"-->
 <!--Don't worry about the request header if you don't know what you're doing. Leave it empty, the app will prompt you to use the default one then "X-TubeRepair-API-Key".-->
+<!--DONT FUCKING DELETE THIS-->
