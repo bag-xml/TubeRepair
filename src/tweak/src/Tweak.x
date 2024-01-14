@@ -205,7 +205,7 @@ CFStringRef realServiceHostname(void) {
     }
     
     if ([URLString rangeOfString:@"https://gdata.youtube.com/feeds/api/playlists"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:@"%@/feeds/api/playlists", newURL];
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:[NSString stringWithFormat:@"%@/feeds/api/playlists", newURL]];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
