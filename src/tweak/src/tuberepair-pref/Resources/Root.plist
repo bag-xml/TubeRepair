@@ -82,6 +82,13 @@
 			<key>footerText</key>
 			<string>The Project TubeRepair was made by bag.xml, ObscureMosquito and Savefade, and huge shoutouts to InvoxiPlayGames and TubeFixer.</string>
 		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Useful things</string>
+		</dict>
 		<dict>
 			<key>action</key> <string>apply</string>
 			<key>cell</key> <string>PSButtonCell</string>
