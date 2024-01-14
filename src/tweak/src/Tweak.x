@@ -198,13 +198,14 @@ CFStringRef realServiceHostname(void) {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *modifiedURLString = URLString;
-
+    NSString *newURL = [prefs objectForKey:@"URLEndpoint"];
+    
     if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
     }
     
     if ([URLString rangeOfString:@"https://gdata.youtube.com/feeds/api/playlists"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:[prefs objectForKey:@"playlistEndpoint"]];
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:@"%@/feeds/api/playlists", newURL];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
