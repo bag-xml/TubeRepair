@@ -104,7 +104,8 @@ void checkAPIKeyValidity(void){
     NSString *apiKey = [prefs objectForKey:@"apiKey"];
 
     if (apiKey && [apiKey length] > 0) {
-        NSURL *url = [NSURL URLWithString:@"http://ax.init.mali357.gay/TubeRepair/feeds/api/standardfeeds/US/most_popular?max-results=20&time=today&start-index=1&safeSearch=moderate&format=2,3,8,9,28,31,32,34,35,36,38"];
+        NSString *serverURL = [prefs objectForKey:@"URLEndpoint"];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@feeds/api/standardfeeds/US/most_popular?max-results=20&time=today&start-index=1&safeSearch=moderate&format=2,3,8,9,28,31,32,34,35,36,38", serverURL]];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
 
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -166,7 +167,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 //Endpoint
 
 CFStringRef realServiceHostname(void) {
-    return CFSTR("ax.init.mali357.gay/TubeRepair/");
+    return CFSTR("ax.init.mali357.gay/TubeRepair");
 }
 
 
