@@ -83,16 +83,15 @@
 			<string>The Project TubeRepair was made by bag.xml, ObscureMosquito and Savefade, and huge shoutouts to InvoxiPlayGames and TubeFixer.</string>
 		</dict>
 		<dict>
-			<key>cellClass</key>
-			<string>HBLinkTableCell</string>
-			<key>label</key>
-			<string>Github</string>
-			<key>subtitle</key>
-			<string>Find the source code here!</string>
-			<key>icon</key>
-			<string>github.png</string>
-			<key>url</key>
-			<string>https://github.com/LacertosusRepo/Open-Source-Tweaks</string>
+			<key>action</key> <string>apply</string>
+			<key>cell</key> <string>PSButtonCell</string>
+			<key>label</key> <string>Tap to respring.</string>
+		</dict>
+		
+		<dict>
+			<key>action</key> <string>guide</string>
+			<key>cell</key> <string>PSButtonCell</string>
+			<key>label</key> <string>Check out the guide!</string>
 		</dict>
 	</array>
 	<key>title</key>

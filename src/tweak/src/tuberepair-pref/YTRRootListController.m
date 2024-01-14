@@ -16,4 +16,12 @@
     [self.view endEditing:YES];
 }
 
+- (void)apply {
+	system("killall -9 SpringBoard");
+}
+
+- (void)guide {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://tuberepair.mali357.gay/]];
+}
+
 @end
