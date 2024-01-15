@@ -314,12 +314,12 @@ CFStringRef realServiceHostname(void) {
         checkAPIKeyValidity();
         warnAboutMissingHeader();
     } else if (version >= 5.0 && version < 11.0) {
-        %init(Baseplate); // Baseplate is common for iOS 5.0 to 10.9
+        %init(Baseplate);
         warnAboutMissingKey();
         checkAPIKeyValidity();
         warnAboutMissingHeader();
         if (version >= 8.0) {
-            %init(iOS8); // Additional initialization for iOS 8 to 10
+            %init(iOS8);
         }
     }
 }
