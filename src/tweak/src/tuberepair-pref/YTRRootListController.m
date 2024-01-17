@@ -21,7 +21,7 @@
 }
 
 - (void)guide {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://tuberepair.mali357.gay/"]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://tuberepair.mali357.gay/guide"]];
 }
 
 @end
