@@ -29,8 +29,6 @@
 			<string>bag.xml.tuberepairpreference</string>
 			<key>key</key>
 			<string>URLEndpoint</string>
-			<key>label</key>
-			<string>URL</string>
 			<key>PostNotification</key>
 			<string>bag.xml.tuberepairpreference/settingschanged</string>
 		</dict>
