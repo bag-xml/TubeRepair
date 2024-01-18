@@ -175,17 +175,12 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 
 
 
-//Endpoint
 
-CFStringRef realServiceHostname(void) {
-    return CFSTR("ax.init.mali357.gay/TubeRepair/");
-}
 
 
 //URL Endpoints
 
 %group Baseplate
-
 
 %hook YTSettings
 
