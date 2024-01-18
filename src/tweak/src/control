@@ -1,9 +1,9 @@
 Package: bag.xml.tuberepair
 Name: TubeRepair [BETA]
-Version: 1.0-Alpha-3.1
+Version: 1.0-Alpha-4
 Architecture: iphoneos-arm
-Description: (Keep in mind, this is a BETA, its NOT FINISHED, and stuff MAY NOT WORK). TubeRepair is a tweak that redirects API traffic from the classic YouTube app, and the App Store YouTube app to a designated custom server. You could also just say that it fixes both applications. For assistance refer to <a href="http://tuberepair.mali357.gay">the guide</a>
+Description: (Keep in mind, this is a BETA, its NOT FINISHED, and stuff MAY NOT WORK). TubeRepair is a tweak that redirects API traffic from the classic YouTube app, and the App Store YouTube app to a designated custom server. You could also just say that it fixes both applications. For assistance refer to the guide (https://tuberepair.mali357.gay/guide)
 Maintainer: bag.xml
 Author: bag.xml
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000)
+Depends: mobilesubstrate, preferenceloader
