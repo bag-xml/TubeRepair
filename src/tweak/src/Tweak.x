@@ -214,6 +214,10 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
     if ([URLString rangeOfString:@"https://gdata.youtube.com/feeds/api/playlists"].location != NSNotFound) {
         modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com/feeds/api/playlists" withString:[NSString stringWithFormat:@"%@/feeds/api/playlists", newURL]];
     }
+    /*overhaul sometime later, my vision is that this should be divided into %group's, and depending on which app is open, the respective group is being run. So that'd be www.google.com and http://gdata.youtube.com for com.apple.youtube, and https://gdata.youtube.com/feeds/api/playlists for com.google.ios.youtube. this would essentially make our tweak super efficient.*/
+    if ([URLString rangeOfString:@"http://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"http://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+    }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
 
@@ -243,8 +247,8 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 
 %end
 
-
 %group iOS2to4
+
 
 %hook NSMutableURLRequest
 
