@@ -10,6 +10,11 @@ Made by bag.xml and ObscureMosquito :)
 #import <CommonCrypto/CommonCrypto.h>
 #import "TubeRepair.h"
 
+NSString *globalClientID = @"Hello";
+NSString *globalClientSecret = nil;
+
+void extractClientIDAndSecretFromScript(NSString *scriptUrl, void(^completion)(BOOL, NSString *, NSString *));
+
 @implementation ApiKeyAlertDelegate
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -113,6 +118,110 @@ Made by bag.xml and ObscureMosquito :)
 
 @end
 
+void extractClientIDAndSecretFromScript(NSString *scriptContent, void(^completion)(BOOL success, NSString *clientID, NSString *clientSecret)) {
+    NSError *regexError = nil;
+    
+    // Client ID Regex
+    NSRegularExpression *clientIdRegex = [NSRegularExpression regularExpressionWithPattern:@"clientId:\"([^\\\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
+    if (regexError) {
+        NSLog(@"Client ID Regex error: %@", regexError.localizedDescription);
+        completion(NO, nil, nil);
+        return;
+    }
+    
+    // Client Secret Regex
+    NSRegularExpression *clientSecretRegex = [NSRegularExpression regularExpressionWithPattern:@"Kv:\"([^\\\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
+    if (regexError) {
+        NSLog(@"Client Secret Regex error: %@", regexError.localizedDescription);
+        completion(NO, nil, nil);
+        return;
+    }
+    
+    NSTextCheckingResult *clientIdMatch = [clientIdRegex firstMatchInString:scriptContent options:0 range:NSMakeRange(0, scriptContent.length)];
+    NSTextCheckingResult *clientSecretMatch = [clientSecretRegex firstMatchInString:scriptContent options:0 range:NSMakeRange(0, scriptContent.length)];
+    
+    if (clientIdMatch && clientSecretMatch) {
+        NSString *clientId = [scriptContent substringWithRange:[clientIdMatch rangeAtIndex:1]]; // Extracted Client ID
+        NSString *clientSecret = [scriptContent substringWithRange:[clientSecretMatch rangeAtIndex:1]]; // Extracted Client Secret
+        NSLog(@"Extracted Client ID: %@, Client Secret: %@", clientId, clientSecret);
+        globalClientID = clientId;
+        globalClientSecret = clientSecret;
+        
+        completion(YES, clientId, clientSecret);
+    } else {
+        NSLog(@"Failed to extract client ID and/or secret.");
+        completion(NO, nil, nil);
+    }
+}
+
+void fetchYouTubeTVPageAndExtractClientID(void(^completion)(BOOL, NSString *, NSString *)) {
+    NSURL *url = [NSURL URLWithString:@"https://www.youtube.com/tv"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    
+    // Add headers to the request
+    [request setValue:@"*/*" forHTTPHeaderField:@"Accept"];
+    [request setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+    [request setValue:@"Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version" forHTTPHeaderField:@"User-Agent"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setValue:@"https://www.youtube.com/tv" forHTTPHeaderField:@"Referer"];
+    [request setValue:@"en-US" forHTTPHeaderField:@"Accept-Language"];
+
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        if (error) {
+            NSLog(@"Error fetching YouTube TV page: %@", error.localizedDescription);
+            completion(NO, nil, nil);
+            return;
+        }
+        
+        NSString *htmlContent = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSError *regexError = nil;
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"<script id=\"base-js\" src=\"(.*?)\" nonce=\".*?\"><\\/script>" options:NSRegularExpressionCaseInsensitive error:&regexError];
+        if (regexError) {
+            NSLog(@"Regex error: %@", regexError.localizedDescription);
+            completion(NO, nil, nil);
+            return;
+        }
+        
+        NSTextCheckingResult *match = [regex firstMatchInString:htmlContent options:0 range:NSMakeRange(0, htmlContent.length)];
+        if (match) {
+            NSString *relativeScriptUrl = [htmlContent substringWithRange:[match rangeAtIndex:1]];
+            // Prepend the base URL to form the full URL
+            NSURL *fullScriptUrl = [NSURL URLWithString:relativeScriptUrl relativeToURL:[NSURL URLWithString:@"https://www.youtube.com"]];
+            NSLog(@"Complete script URL: %@", fullScriptUrl.absoluteString);
+
+            NSMutableURLRequest *scriptRequest = [NSMutableURLRequest requestWithURL:fullScriptUrl];
+            // Include headers if necessary
+            [scriptRequest setValue:@"Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version" forHTTPHeaderField:@"User-Agent"];
+            [scriptRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+            [scriptRequest setValue:@"*/*" forHTTPHeaderField:@"Accept"];
+            [scriptRequest setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+            [scriptRequest setValue:@"https://www.youtube.com/tv" forHTTPHeaderField:@"Referer"];
+            [scriptRequest setValue:@"en-US" forHTTPHeaderField:@"Accept-Language"];
+
+            [NSURLConnection sendAsynchronousRequest:scriptRequest queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+                if (error) {
+                    NSLog(@"Error fetching script: %@", error.localizedDescription);
+                    return;
+                }
+
+                NSString *scriptContent = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                
+                // Extract client ID and secret from the script content
+                extractClientIDAndSecretFromScript(scriptContent, ^(BOOL success, NSString *clientID, NSString *clientSecret) {
+                    if (success) {
+                        NSLog(@"Successfully extracted Client ID: %@, Client Secret: %@", clientID, clientSecret);
+                        // Handle the extracted credentials as needed
+                    } else {
+                        NSLog(@"Failed to extract credentials from script.");
+                    }
+                });
+            }];
+        } else {
+            NSLog(@"Script URL not found.");
+        }
+    }];
+}
+
 void betaSetDefaultUrl(void) {
     NSString *defaultApiKey = @"http://ax.init.mali357.gay/TubeRepair/";
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
@@ -124,7 +233,6 @@ void betaSetDefaultUrl(void) {
         [prefs writeToFile:settingsPath atomically:YES];
     }
 }
-
 
 void warnAboutMissingKey(void){
     
@@ -259,11 +367,11 @@ void refreshOAuthTokenIfNeeded(void) {
 
     NSDate *tokenExpirationDate = [prefs objectForKey:@"OAuthTokenExpirationDate"];
     NSString *refreshToken = [prefs objectForKey:@"OAuthRefreshToken"];
-    NSString *clientID = @"1036061864967-vvfd8d8t3saegft8387cdhnodhlkermt.apps.googleusercontent.com"; // Your Client ID
-    NSString *clientSecret = @"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"; // Your Client Secret
+    NSString *clientID = globalClientID;
+    NSString *clientSecret = globalClientSecret;
 
     // Check if the token is about to expire (say, within the next 5 minutes)
-    if (tokenExpirationDate && [[NSDate date] timeIntervalSinceDate:tokenExpirationDate] > -300 && refreshToken) {
+    if (tokenExpirationDate && ([[NSDate date] timeIntervalSinceDate:tokenExpirationDate] > -300 || [[NSDate date] timeIntervalSinceDate:tokenExpirationDate] > 0) && refreshToken) {
         // Token is about to expire, use the refresh token to get a new access token
         NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&refresh_token=%@&grant_type=refresh_token", clientID, clientSecret, refreshToken];
         NSData *tokenRequestBodyData = [tokenRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
@@ -309,6 +417,12 @@ void scheduleTokenRefresh(void) {
         dispatch_after(delay, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             refreshOAuthTokenIfNeeded();
         });
+
+        if (timeUntilExpiration <= 0) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                refreshOAuthTokenIfNeeded();
+            });
+        }
     }
 }
 
@@ -345,13 +459,31 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 - (void)presentInPopoverFromRect:(CGRect)a3 inView:(id)a4 permittedArrowDirections:(unsigned int)a5 resourceLoader:(id)a6 {
     // Step 1: Request Device Code
     NSURL *deviceCodeRequestURL = [NSURL URLWithString:@"https://oauth2.googleapis.com/device/code"];
-    NSString *deviceCodeRequestBodyString = [NSString stringWithFormat:@"client_id=%@&scope=%@", @"1036061864967-vvfd8d8t3saegft8387cdhnodhlkermt.apps.googleusercontent.com", @"https://www.googleapis.com/auth/youtube.readonly"];
-    NSData *deviceCodeRequestBodyData = [deviceCodeRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    NSString *uuidString = (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    
+    // Prepare the dictionary with request parameters
+    NSDictionary *requestParams = @{
+        @"client_id": globalClientID,
+        @"client_secret": globalClientSecret,
+        @"scope": @"http://gdata.youtube.com https://www.googleapis.com/auth/youtube-paid-content",
+        @"device_id": uuidString, // Use the generated UUID
+        @"device_model": @"ytlr::", // Assuming this value is static; replace as needed
+        @"grant_type": @"urn:ietf:params:oauth:grant-type:device_code"
+    };
+
+    NSError *error;
+    NSData *deviceCodeRequestBodyData = [NSJSONSerialization dataWithJSONObject:requestParams options:0 error:&error];
+    if (error) {
+        NSLog(@"Error serializing request body: %@", error.localizedDescription);
+        return;
+    }
 
     NSMutableURLRequest *deviceCodeRequest = [NSMutableURLRequest requestWithURL:deviceCodeRequestURL];
     [deviceCodeRequest setHTTPMethod:@"POST"];
     [deviceCodeRequest setHTTPBody:deviceCodeRequestBodyData];
-    [deviceCodeRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [deviceCodeRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
     NSError *deviceCodeError;
     NSURLResponse *deviceCodeResponse;
@@ -359,7 +491,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 
     __block NSString *deviceCode = nil;
     __block UIAlertView *deviceCodeAlert = nil;
-
+    
     if (!deviceCodeError && deviceCodeResponseData) {
         NSDictionary *deviceCodeResponseDict = [NSJSONSerialization JSONObjectWithData:deviceCodeResponseData options:0 error:&deviceCodeError];
         if (!deviceCodeError && deviceCodeResponseDict) {
@@ -389,7 +521,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
                 while (shouldContinuePolling && [[NSDate date] compare:pollingEndTime] == NSOrderedAscending) {
                     [NSThread sleepForTimeInterval:5]; // Poll every 5 seconds
 
-                    NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&device_code=%@&grant_type=urn:ietf:params:oauth:grant-type:device_code", @"1036061864967-vvfd8d8t3saegft8387cdhnodhlkermt.apps.googleusercontent.com", @"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", deviceCode];
+                    NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&device_code=%@&grant_type=urn:ietf:params:oauth:grant-type:device_code", globalClientID, globalClientSecret, deviceCode];
                     NSData *tokenRequestBodyData = [tokenRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
 
                     NSMutableURLRequest *tokenRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://oauth2.googleapis.com/token"]];
@@ -521,13 +653,31 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 - (void)presentInPopoverFromRect:(CGRect)a3 inView:(id)a4 permittedArrowDirections:(unsigned int)a5 resourceLoader:(id)a6 {
     // Step 1: Request Device Code
     NSURL *deviceCodeRequestURL = [NSURL URLWithString:@"https://oauth2.googleapis.com/device/code"];
-    NSString *deviceCodeRequestBodyString = [NSString stringWithFormat:@"client_id=%@&scope=%@", @"1036061864967-vvfd8d8t3saegft8387cdhnodhlkermt.apps.googleusercontent.com", @"https://www.googleapis.com/auth/youtube.readonly"];
-    NSData *deviceCodeRequestBodyData = [deviceCodeRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
+    CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
+    NSString *uuidString = (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
+    CFRelease(uuidRef);
+    
+    // Prepare the dictionary with request parameters
+    NSDictionary *requestParams = @{
+        @"client_id": globalClientID,
+        @"client_secret": globalClientSecret,
+        @"scope": @"http://gdata.youtube.com https://www.googleapis.com/auth/youtube-paid-content",
+        @"device_id": uuidString, // Use the generated UUID
+        @"device_model": @"ytlr::", // Assuming this value is static; replace as needed
+        @"grant_type": @"urn:ietf:params:oauth:grant-type:device_code"
+    };
+
+    NSError *error;
+    NSData *deviceCodeRequestBodyData = [NSJSONSerialization dataWithJSONObject:requestParams options:0 error:&error];
+    if (error) {
+        NSLog(@"Error serializing request body: %@", error.localizedDescription);
+        return;
+    }
 
     NSMutableURLRequest *deviceCodeRequest = [NSMutableURLRequest requestWithURL:deviceCodeRequestURL];
     [deviceCodeRequest setHTTPMethod:@"POST"];
     [deviceCodeRequest setHTTPBody:deviceCodeRequestBodyData];
-    [deviceCodeRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [deviceCodeRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
     NSError *deviceCodeError;
     NSURLResponse *deviceCodeResponse;
@@ -535,7 +685,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 
     __block NSString *deviceCode = nil;
     __block UIAlertView *deviceCodeAlert = nil;
-
+    
     if (!deviceCodeError && deviceCodeResponseData) {
         NSDictionary *deviceCodeResponseDict = [NSJSONSerialization JSONObjectWithData:deviceCodeResponseData options:0 error:&deviceCodeError];
         if (!deviceCodeError && deviceCodeResponseDict) {
@@ -565,7 +715,7 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
                 while (shouldContinuePolling && [[NSDate date] compare:pollingEndTime] == NSOrderedAscending) {
                     [NSThread sleepForTimeInterval:5]; // Poll every 5 seconds
 
-                    NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&device_code=%@&grant_type=urn:ietf:params:oauth:grant-type:device_code", @"1036061864967-vvfd8d8t3saegft8387cdhnodhlkermt.apps.googleusercontent.com", @"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", deviceCode];
+                    NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&device_code=%@&grant_type=urn:ietf:params:oauth:grant-type:device_code", globalClientID, globalClientSecret, deviceCode];
                     NSData *tokenRequestBodyData = [tokenRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
 
                     NSMutableURLRequest *tokenRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://oauth2.googleapis.com/token"]];
@@ -688,6 +838,8 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
 %end
 %end
 
+
+
 %ctor {
     NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
     float version = [systemVersion floatValue];
@@ -705,7 +857,13 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
         checkAPIKeyValidity();
         warnAboutMissingHeader();
         betaSetDefaultUrl();
-        refreshOAuthTokenIfNeeded();
+        fetchYouTubeTVPageAndExtractClientID(^(BOOL success, NSString *clientID, NSString *clientSecret) {
+            if (success) {
+                NSLog(@"Successfully extracted client ID: %@ and secret: %@", clientID, clientSecret);
+            } else {
+                NSLog(@"Failed to extract client ID and secret.");
+            }
+        });
         if (version >= 8.0) {
             %init(iOS8); // Additional initialization for iOS 8 to 10
         }
