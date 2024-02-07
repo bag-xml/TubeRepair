@@ -1,9 +1,21 @@
 <?php
 include "configuration.php";
-if(isset($_GET["max-results"])){
-if(isset($_SERVER['HTTP_X_TUBEREPAIR_API_KEY'])){ $APIkey = $_SERVER['HTTP_X_TUBEREPAIR_API_KEY'];}
-$curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/videos?part=snippet&chart=mostPopular&maxResults=" . $MaxCount . "&type=video&key=" . $APIkey);
-curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
+if (isset($_GET["max-results"])) {
+    if (isset($_SERVER[$customAPIKeyHeader])) { 
+        $APIkey = $_SERVER[$customAPIKeyHeader];
+    }
+    $uri = $_SERVER['REQUEST_URI'];
+    $uriSegments = explode('/', $uri);
+    
+    $regionSegment = $uriSegments[5];
+    $regionCode = strtoupper($regionSegment);
+
+    error_log("Region Code: " . $regionCode);
+    
+    $apiURL = "https://" . $APIurl . "/youtube/v3/videos?part=snippet,contentDetails&chart=mostPopular&regionCode=" . $regionCode . "&maxResults=" . $MaxCount . "&type=video&key=" . $APIkey;
+    
+    $curlConnectionInitialization = curl_init($apiURL);
+	
 curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
 
 $response = curl_exec($curlConnectionInitialization);
@@ -11,22 +23,62 @@ if(curl_error($curlConnectionInitialization)) {
   die(curl_error($curlConnectionInitialization));
 }
 $decodeResponce = json_decode($response, true);
+if(!isset(json_decode($response, false)->kind)){
+	if($decodeResponce["error"]["errors"][0]["reason"] ==  "badRequest"){
+		header("HTTP/1.0 401 Forbidden");
+	    die($response);
+	}
+	if($decodeResponce["error"]["errors"][0]["reason"] ==  "quotaExceeded"){
+		header("HTTP/1.1 401 Unauthorized");
+	    die($response);
+	}
+}
 $kindResponse = json_decode($response, false)->kind;
 if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.0") || $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.1")|| $kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_USER_AGENT"], "com.google.ios.youtube/1.2") || str_contains($_SERVER["HTTP_USER_AGENT"], "Android") ){
 	$maxResultsFromYT = $decodeResponce['pageInfo']['resultsPerPage'];
 	$entries = "";
+	$videoIdsFromResult = "";
+	for($i = 0; $i<$maxResultsFromYT; $i++){
+	$videoID = $decodeResponce['items'][$i]['id'];
+    $videoIdsFromResult = empty($videoIdsFromResult) ? $videoID : $videoIdsFromResult . "," . $videoID ;
+	}
+	$statisticResponse = getVideoDetailsJson($videoIdsFromResult, $APIkey);
 	for($i = 0; $i<$maxResultsFromYT; $i++){
 	$videoID = $decodeResponce['items'][$i]['id'];
 	$channelname = $decodeResponce['items'][$i]['snippet']['channelTitle'];
-	$description = "Not Supported!";
+	$description = str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $decodeResponce['items'][$i]['snippet']['description']);
 	//$description = $decodeResponce['items'][$i]['snippet']['description'];
 	$videoname = $decodeResponce['items'][$i]['snippet']['title'];
 	$publishDate = 	rtrim($decodeResponce['items'][$i]['snippet']['publishedAt'], 'Z') . ".000Z";
+	
+	$likes = 0;
+	$views = 0;
+	$commentCount = 0;
+	$favoriteCount = 0;
+	$dislikes = 0;
+	
+	$views = $statisticResponse['items'][$i]['statistics']['viewCount'];
+	if(isset($statisticResponse['items'][$i]['statistics']['likeCount']))
+	$likes = $statisticResponse['items'][$i]['statistics']['likeCount'];
+    if(isset($statisticResponse['items'][$i]['statistics']['commentCount']))
+	$commentCount = $statisticResponse['items'][$i]['statistics']['commentCount'];
+    if(isset($statisticResponse['items'][$i]['statistics']['favoriteCount']))
+	$favoriteCount = $statisticResponse['items'][$i]['statistics']['favoriteCount'];
+    if(isset($statisticResponse['items'][$i]['statistics']['likeCount']) && isset($statisticResponse['items'][$i]['statistics']['viewCount']))
+	$dislikes = ($views - ($likes * 16)) / 48;
+	//$videoDuration = strtotime($statisticResponse['items'][0]['contentDetails']['duration']);
+	//$durationIn = new DateInterval($videoDuration);
+	//$durationInSeconds = $durationIn->s + $durationIn->i * 60 + $durationIn->h * 3600;
+	$durationInSeconds = 1;
+	
 	$channelId = $decodeResponce['items'][$i]['snippet']['channelId'];
 	$etag = $decodeResponce['items'][$i]['etag'];
 	$defaultTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['default']['url'];
 	$mediumTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['medium']['url'];
 	$highTHURL = $decodeResponce['items'][$i]['snippet']['thumbnails']['high']['url'];
+	$ISO8601Duration = $decodeResponce['items'][$i]['contentDetails']['duration'];
+    $durationInSeconds = convertISO8601ToSeconds($ISO8601Duration);
+	
 	$entryiOS = <<<Entry
 	<entry gd:etag='W/&quot;YDwqeyM.&quot;'>
 		<id>tag:youtube.com,2008:playlist:$videoID:$videoID</id>
@@ -80,15 +132,15 @@ if($kindResponse == "youtube#videoListResponse" && str_contains($_SERVER["HTTP_U
             <media:content url="http://$baseURL/$serverScriptDirectory/GetVideo.php?videoId=$videoID" type="video/mp4" medium="video" expression="full" duration="0" yt:format="8" />
             <media:content url="http://$baseURL/$serverScriptDirectory/$videoID.3gpp" type="video/3gpp" medium="video" expression="full" duration="0" yt:format="9" />
 			<media:title type='plain'>$videoname</media:title>
-			<yt:duration seconds='0'/>
+			<yt:duration seconds='$durationInSeconds'/>
 			<yt:uploaded>$publishDate</yt:uploaded>
 			<yt:uploaderId>$channelId</yt:uploaderId>
 			<yt:videoid>$videoID</yt:videoid>
 		</media:group>
 		<gd:rating average='0' max='0' min='0' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-		<yt:recorded>1970-01-01</yt:recorded>
-		<yt:statistics favoriteCount='0' viewCount='0'/>
-		<yt:rating numDislikes='0' numLikes='0'/>
+		<yt:recorded>1970-08-22</yt:recorded>
+		<yt:statistics favoriteCount='$favoriteCount' viewCount='$views'/>
+		<yt:rating numDislikes='$dislikes' numLikes='$likes'/>
 		<yt:position>1</yt:position>
 	</entry>
 Entry;
@@ -163,7 +215,6 @@ $youtubeXML = <<<XML
   <openSearch:itemsPerPage>$maxResultsFromYT</openSearch:itemsPerPage>
   <openSearch:startIndex>1</openSearch:startIndex>
   $entries
-  <debug>$response</debug>
 </feed>
 XML;
 die($youtubeXML);
@@ -174,6 +225,31 @@ die("An internal server error has occured! If there is a new version of the serv
 curl_close($curlConnectionInitialization);	
 }
 
-function getDescription($videoId){
-	$decodeResponce['items'][0]['snippet']['description'];
+function getVideoDetailsJson($videoId, $key){
+include "configuration.php";
+$curlConnectionInitialization = curl_init("https://" . $APIurl . "/youtube/v3/videos?part=statistics,contentDetails&id=". $videoId ."&key=" . $key);
+curl_setopt($curlConnectionInitialization, CURLOPT_HEADER, 0);
+curl_setopt($curlConnectionInitialization, CURLOPT_RETURNTRANSFER, true);
+
+function convertISO8601ToSeconds($ISO8601) {
+    $interval = new DateInterval($ISO8601);
+    return ($interval->d * 86400) + ($interval->h * 3600) + ($interval->i * 60) + $interval->s;
+}
+
+$response = curl_exec($curlConnectionInitialization);
+if(curl_error($curlConnectionInitialization)) {
+  die(curl_error($curlConnectionInitialization));
+}
+$decodeResponce = json_decode($response, true);
+if(!isset(json_decode($response, false)->kind)){
+	if($decodeResponce["error"]["errors"][0]["reason"] ==  "badRequest"){
+		header("HTTP/1.0 403 Forbidden");
+	    die($response);
+	}
+	if($decodeResponce["error"]["errors"][0]["reason"] ==  "quotaExceeded"){
+		header("HTTP/1.1 401 Unauthorized");
+	    die($response);
+	}
+}
+return $decodeResponce;
 } 
