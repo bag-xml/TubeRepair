@@ -1,5 +1,6 @@
 <?php
-$type = $_GET['type'];
+include "configuration.php";
 $videoID = $_GET['videoId'];
-echo $type;
-echo $videoID
+if(strlen($videoID) > 2){
+	header("Location: https://$invidiousURL/latest_version?id=" . $videoID . "&itag=18"); //i added itag so invidious will return 360p playback
+}
