@@ -11,7 +11,7 @@ Made by bag.xml and ObscureMosquito :)
 #import "TubeRepair.h"
 
 NSString *globalClientID = @"Hello";
-NSString *globalClientSecret = nil;
+NSString *globalClientSecret = @"Hello";
 
 void extractClientIDAndSecretFromScript(NSString *scriptUrl, void(^completion)(BOOL, NSString *, NSString *));
 
@@ -121,16 +121,16 @@ void extractClientIDAndSecretFromScript(NSString *scriptUrl, void(^completion)(B
 void extractClientIDAndSecretFromScript(NSString *scriptContent, void(^completion)(BOOL success, NSString *clientID, NSString *clientSecret)) {
     NSError *regexError = nil;
     
-    // Client ID Regex
-    NSRegularExpression *clientIdRegex = [NSRegularExpression regularExpressionWithPattern:@"clientId:\"([^\\\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
+    // Updated Client ID Regex to match the provided syntax
+    NSRegularExpression *clientIdRegex = [NSRegularExpression regularExpressionWithPattern:@"clientId:\"([^\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
     if (regexError) {
         NSLog(@"Client ID Regex error: %@", regexError.localizedDescription);
         completion(NO, nil, nil);
         return;
     }
-    
-    // Client Secret Regex
-    NSRegularExpression *clientSecretRegex = [NSRegularExpression regularExpressionWithPattern:@"Kv:\"([^\\\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
+
+    // Updated Client Secret Regex to match any key that is two characters long, where the second character is 'v'
+    NSRegularExpression *clientSecretRegex = [NSRegularExpression regularExpressionWithPattern:@"[A-Za-z]v:\"([^\"]+)\"" options:NSRegularExpressionCaseInsensitive error:&regexError];
     if (regexError) {
         NSLog(@"Client Secret Regex error: %@", regexError.localizedDescription);
         completion(NO, nil, nil);
@@ -212,12 +212,28 @@ void fetchYouTubeTVPageAndExtractClientID(void(^completion)(BOOL, NSString *, NS
                         NSLog(@"Successfully extracted Client ID: %@, Client Secret: %@", clientID, clientSecret);
                         // Handle the extracted credentials as needed
                     } else {
-                        NSLog(@"Failed to extract credentials from script.");
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        static ApiKeyAlertDelegate *alertDelegate = nil;
+                        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Client ID Extracion"
+                                                                                    message:@"Extracting YouTube TV's client ID failed, this means you will not be able to log in if not logged in already."
+                                                                                delegate:alertDelegate
+                                                                        cancelButtonTitle:@"OK"
+                                                                        otherButtonTitles:nil];
+                                [alertView show];
+                        });
                     }
                 });
             }];
         } else {
-            NSLog(@"Script URL not found.");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                static ApiKeyAlertDelegate *alertDelegate = nil;
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Client ID Extracion"
+                                                                                message:@"Extracting YouTube TV's client ID failed, this means you will not be able to log in if not logged in already."
+                                                                            delegate:alertDelegate
+                                                                    cancelButtonTitle:@"OK"
+                                                                    otherButtonTitles:nil];
+                            [alertView show];
+            });
         }
     }];
 }
@@ -358,28 +374,26 @@ void refreshOAuthTokenIfNeeded(void) {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
 
-    // Check if the OAuth access token is present
+    // Extract necessary details from preferences
     NSString *accessToken = [prefs objectForKey:@"OAuthAccessToken"];
-    if (!accessToken) {
-        // Access token not present, likely user has not logged in
-        return; // Stop the function
-    }
-
     NSDate *tokenExpirationDate = [prefs objectForKey:@"OAuthTokenExpirationDate"];
     NSString *refreshToken = [prefs objectForKey:@"OAuthRefreshToken"];
-    NSString *clientID = globalClientID;
-    NSString *clientSecret = globalClientSecret;
 
-    // Check if the token is about to expire (say, within the next 5 minutes)
-    if (tokenExpirationDate && ([[NSDate date] timeIntervalSinceDate:tokenExpirationDate] > -300 || [[NSDate date] timeIntervalSinceDate:tokenExpirationDate] > 0) && refreshToken) {
-        // Token is about to expire, use the refresh token to get a new access token
-        NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&refresh_token=%@&grant_type=refresh_token", clientID, clientSecret, refreshToken];
+    // Check if the access token is about to expire or has expired
+    if (accessToken && refreshToken && (!tokenExpirationDate || [tokenExpirationDate compare:[NSDate date]] != NSOrderedDescending)) {
+        NSString *tokenRequestBodyString = [NSString stringWithFormat:@"client_id=%@&client_secret=%@&refresh_token=%@&grant_type=refresh_token", globalClientID, globalClientSecret, refreshToken];
         NSData *tokenRequestBodyData = [tokenRequestBodyString dataUsingEncoding:NSUTF8StringEncoding];
 
         NSMutableURLRequest *tokenRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://oauth2.googleapis.com/token"]];
         [tokenRequest setHTTPMethod:@"POST"];
         [tokenRequest setHTTPBody:tokenRequestBodyData];
         [tokenRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+        [tokenRequest setValue:@"/" forHTTPHeaderField:@"Accept"];
+        [tokenRequest setValue:@"https://www.youtube.com" forHTTPHeaderField:@"Origin"];
+        [tokenRequest setValue:@"Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version" forHTTPHeaderField:@"User-Agent"];
+        [tokenRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        [tokenRequest setValue:@"https://www.youtube.com/tv" forHTTPHeaderField:@"Referer"];
+        [tokenRequest setValue:@"en-US" forHTTPHeaderField:@"Accept-Language"];
 
         NSError *error;
         NSURLResponse *response;
@@ -390,16 +404,25 @@ void refreshOAuthTokenIfNeeded(void) {
             if (!error && tokenResponse) {
                 NSString *newAccessToken = tokenResponse[@"access_token"];
                 NSNumber *expiresIn = tokenResponse[@"expires_in"];
+                NSString *newRefreshToken = tokenResponse[@"refresh_token"]; // Some servers might return a new refresh token
 
                 if (newAccessToken && expiresIn) {
-                    // Save the new access token and update the expiration date
                     NSDate *newExpirationDate = [[NSDate date] dateByAddingTimeInterval:[expiresIn doubleValue]];
                     [prefs setObject:newAccessToken forKey:@"OAuthAccessToken"];
                     [prefs setObject:newExpirationDate forKey:@"OAuthTokenExpirationDate"];
+                    
+                    // Optionally update the refresh token if a new one is provided
+                    if (newRefreshToken) {
+                        [prefs setObject:newRefreshToken forKey:@"OAuthRefreshToken"];
+                    }
+                    
                     [prefs writeToFile:settingsPath atomically:YES];
-                    scheduleTokenRefresh();
                 }
+            } else {
+                NSLog(@"Failed to refresh token: %@", error.localizedDescription);
             }
+        } else {
+            NSLog(@"Error making refresh token request: %@", error.localizedDescription);
         }
     }
 }
@@ -800,14 +823,15 @@ void addCustomHeaderToRequest(NSMutableURLRequest *request) {
     NSString *settingsPath = @"/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist";
     NSMutableDictionary *prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:settingsPath];
     NSString *modifiedURLString = URLString;
+    NSString *newURL = [prefs objectForKey:@"URLEndpoint"];
 
-
-    if ([URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+    // Ensure newURL is not nil before attempting to replace occurrences
+    if (newURL && [URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:newURL];
     }
-    
-        if ([URLString rangeOfString:@"https://www.google.com"].location != NSNotFound) {
-        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://www.google.com" withString:[prefs objectForKey:@"URLEndpoint"]];
+
+    if (newURL && [URLString rangeOfString:@"https://gdata.youtube.com"].location != NSNotFound) {
+        modifiedURLString = [URLString stringByReplacingOccurrencesOfString:@"https://gdata.youtube.com" withString:newURL];
     }
 
     NSURL *modifiedURL = %orig(modifiedURLString);
