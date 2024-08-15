@@ -3,5 +3,5 @@
 <h1>TubeRepair</h1>
 </div>
 
-This repository features the TubeRepair 1.x tweak, and it's respective backend coded by Savefade.
+This repository features the TubeRepair 1.x tweak, and it's respective backend.
 Please be aware that this repository does NOT offer the newest, up-to-date version of the TubeRepair tweak as soon as a new version comes out after the archival date.
