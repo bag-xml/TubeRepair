@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Welcome to TubeRepair!</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>If you installed this tweak for the first time, I encourage that you read the guide through (at the bottom) for maximal transparency!</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Custom URL</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>bag.xml.tuberepairpreference</string>
+			<key>key</key>
+			<string>URLEndpoint</string>
+			<key>PostNotification</key>
+			<string>bag.xml.tuberepairpreference/settingschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>The Project TubeRepair was made by bag.xml, ObscureMosquito and Savefade, and huge shoutouts to InvoxiPlayGames and TubeFixer.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Useful things</string>
+		</dict>
+		<dict>
+			<key>action</key> <string>guide</string>
+			<key>cell</key> <string>PSButtonCell</string>
+			<key>label</key> <string>Check out the guide!</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>TubeRepair</string>
+</dict>
+</plist>
+<!-- DONT DELETE THIS IM TOO LAZY TO RE-WRITE IT-->
+<!--Welcome to TubeRepair's beta! All you, dear beta tester, need to do is to fill out the fields below you. With the correct information it shouldn't be all that hard to fullfill this request.-->
+<!--Here goes the server URL. Make sure to specify http/s, and a slash after your target domain, or folder. The default would be "http://ax.init.mali357.gay/TubeRepair/" For the Playlists, specify the same URL as above, but with "feeds/api/playlists" appended. An example would be: "https://example.com/TubeRepair/feeds/api/playlists"-->
+<!--Don't worry about the request header if you don't know what you're doing. Leave it empty, the app will prompt you to use the default one then "X-TubeRepair-API-Key".-->
+<!--DONT FUCKING DELETE THIS-->

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+files=(
+    "/var/mobile/Library/Preferences/bag.xml.tuberepairpreference.plist"
+)
+
+echo "Initialization done!"
